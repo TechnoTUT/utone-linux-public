@@ -1,2 +1,2 @@
 #!/bin/bash
-/opt/moip-toolkit/.venv/bin/python /opt/moip-toolkit/main.py web "$@"
+exec /opt/moip-toolkit/bin/moip web "$@"
