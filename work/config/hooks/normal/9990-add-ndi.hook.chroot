@@ -1,19 +1,32 @@
 #!/bin/bash
-# Install uv
-export UV_INSTALL_DIR="/usr/local/bin"
-curl -LsSf https://astral.sh/uv/install.sh | sh
+# Build moip-toolkit (NDI receive/transmit, multiview and digital signage):
+# the media engine (Rust), the server and `moip` command (Go) and the web UI
+# (Nuxt). libndi.so.6 is loaded at run time and installed by the booth hook.
+set -euo pipefail
 
-# Install NDI utilities
+# Install a temporary Rust toolchain (removed after the build)
+export RUSTUP_HOME=/tmp/rustup
+export CARGO_HOME=/tmp/cargo
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --no-modify-path
+export PATH="$CARGO_HOME/bin:$PATH"
+export GOCACHE=/tmp/go-build
+export GOMODCACHE=/tmp/go-mod
+
+# Build bin/moip and bin/moip-engine
 cd /opt/moip-toolkit
-uv venv
-uv pip install -r requirements.txt
-# Build frontend
-cd /opt/moip-toolkit/frontend
-sudo npm install -g n
+make
+ln -sf /opt/moip-toolkit/bin/moip /usr/local/bin/moip
+
+# Build frontend (installs the latest stable Node.js, also used by later hooks)
+npm install -g n
 n stable
-sudo apt remove nodejs npm -y
+apt-get remove -y nodejs npm
+hash -r
 export NUXT_TELEMETRY_DISABLED=1
 export CI=1
-npm install
-npm run build
+make frontend
+
+# Clean up: build artifacts, the toolchain and the Go caches
+rm -rf engine/target frontend/node_modules "$RUSTUP_HOME" "$CARGO_HOME" "$GOCACHE" "$GOMODCACHE"
+mkdir -p /opt/moip-toolkit/data/signage
 chmod -R 777 /opt/moip-toolkit/data

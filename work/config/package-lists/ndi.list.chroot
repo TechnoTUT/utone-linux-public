@@ -1,5 +1,12 @@
 git
+curl
 avahi-daemon
+build-essential
+pkg-config
+golang
+libsdl2-dev
+libsdl2-2.0-0
+libasound2-dev
 libgl1-mesa-dev
 nodejs
 npm
