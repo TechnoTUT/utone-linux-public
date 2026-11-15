@@ -16,20 +16,20 @@ To receive NDI signals, run the following command:
 nrx
 ```
 
-To change the connection destination, edit the `.config/systemd/user/ndi-rx.service` in your home directory and enable the service:  
+To change the connection destination, edit the `.config/systemd/user/nrx.service` in your home directory and enable the service:  
 
 ```bash
-vim ~/.config/systemd/user/ndi-rx.service
-systemctl --user enable --now ndi-rx.service
+vim ~/.config/systemd/user/nrx.service
+systemctl --user enable --now nrx.service
 ```
 
-`ndi-rx.service` uses the `kmsdrm` video driver by default, which bypasses the desktop compositor and renders directly to the display for the lowest latency. To use the desktop compositor instead, remove `--video-driver kmsdrm` from the `ExecStart` line. To run it manually with kmsdrm:  
+`nrx` renders through KMS/DRM by default, which bypasses the desktop compositor and draws directly to the display for the lowest latency. To show it on a desktop session instead, use the commented-out `ExecStart` line with `--video-driver auto`. To choose a source manually:  
 ```bash
-uv run /opt/moip-toolkit/main.py rx -s "<NDI Source Name>" --video-driver kmsdrm
+nrx -s "<NDI Source Name>"
 ```
 - No desktop session may be running on that display (console / TTY state). `sudo systemctl set-default multi-user.target` makes the machine boot without a GUI.
 - Add the user to the `video` and `input` groups: `sudo usermod -aG video,input $USER`
-- Output is always fullscreen.
+- Output is always fullscreen. If a desktop session owns the display, it falls back to a window on the desktop.
 
 ### Transmit NDI
 To transmit NDI signals from a capture board, run the following command:  
@@ -38,25 +38,25 @@ ntx
 ```
 Transmits NDI signals as `<HOSTNAME> (TX)`.  
 
-If you want to change arguments such as the transmission name, resolution, or frame rate, edit `.config/systemd/user/ndi-tx.service` in the home directory and enable the service. List of arguments can be checked with `ntx --help`.   
+If you want to change arguments such as the transmission name, resolution, or frame rate, edit `.config/systemd/user/ntx.service` in the home directory and enable the service. List of arguments can be checked with `ntx --help`.   
 ```bash
-vim ~/.config/systemd/user/ndi-tx.service
-systemctl --user enable --now ndi-tx.service
+vim ~/.config/systemd/user/ntx.service
+systemctl --user enable --now ntx.service
 ```
 The default hostname is `debian`. To change the hostname, use the command `sudo hostnamectl set-hostname <new hostname>`.  
 
 ### Signage
 Signage is provided by moip-toolkit. Start the Web UI service, then upload an image from your browser to show it fullscreen on the connected display:  
 ```bash
-systemctl --user enable --now ndi-web.service
+systemctl --user enable --now nweb.service
 ```
 Open `http://<IP address>:8000/` in a browser (the IP address is shown at login). To keep the setting after reboot, use persistent storage.  
 
 You can also show an image directly from the command line:  
 ```bash
-/opt/moip-toolkit/.venv/bin/python /opt/moip-toolkit/main.py signage -i /path/to/image.png --fullscreen
+moip signage /path/to/image.png
 ```
-If `-i` is omitted, the most recent image uploaded via the Web UI is shown. On a console without a GUI (TTY), add `--framebuffer` to draw directly to the Linux framebuffer (root privileges may be required).  
+Add `--framebuffer` to draw directly to the Linux framebuffer without a GPU (`/dev/fb0`, the live user is in the `video` group).  
 See the [moip-toolkit README](https://github.com/TechnoTUT/moip-toolkit) for details.
 
 ### Booth display

@@ -16,20 +16,20 @@ NDI信号を受信するには、以下のコマンドを実行します:
 nrx
 ```
 
-接続先を設定して自動起動を有効にするには、ホームディレクトリの `.config/systemd/user/ndi-rx.service` を編集します: 
+接続先を設定して自動起動を有効にするには、ホームディレクトリの `.config/systemd/user/nrx.service` を編集します: 
 
 ```bash
-vim ~/.config/systemd/user/ndi-rx.service
-systemctl --user enable --now ndi-rx.service
+vim ~/.config/systemd/user/nrx.service
+systemctl --user enable --now nrx.service
 ```
 
-`ndi-rx.service` は初期設定で `kmsdrm` ビデオドライバを使用し、デスクトップのコンポジタを経由せずにディスプレイへ直接出力して遅延を最小にします。デスクトップのコンポジタを使う場合は、`ExecStart` から `--video-driver kmsdrm` を削除します。手動でkmsdrmを使って実行するには:  
+`nrx` は初期設定でKMS/DRMを使用し、デスクトップのコンポジタを経由せずにディスプレイへ直接出力して遅延を最小にします。デスクトップセッション上に表示する場合は、コメントアウトされている `--video-driver auto` 付きの `ExecStart` を使用します。ソースを指定して手動で実行するには:  
 ```bash
-uv run /opt/moip-toolkit/main.py rx -s "<NDIソース名>" --video-driver kmsdrm
+nrx -s "<NDIソース名>"
 ```
 - 対象のディスプレイでデスクトップセッションが動作していない必要があります(コンソール / TTY の状態)。`sudo systemctl set-default multi-user.target` でGUIなしで起動するようになります。
 - ユーザーを `video` と `input` グループに追加します: `sudo usermod -aG video,input $USER`
-- 出力は常に全画面になります。
+- 出力は常に全画面になります。デスクトップセッションが画面を使っている場合は、デスクトップ上のウィンドウ表示に切り替わります。
 
 ### NDI送信
 キャプチャーボードからNDI信号を送信するには、以下のコマンドを実行します:  
@@ -38,25 +38,25 @@ ntx
 ```
 NDI信号を `<HOSTNAME> (TX)` として送信します。
 
-送信名や解像度、フレームレートなどの引数を変更し自動起動を有効にする場合は、ホームディレクトリの `.config/systemd/user/ndi-tx.service` を編集し、サービスを起動します。引数の一覧は、`ntx --help`で確認できます。  
+送信名や解像度、フレームレートなどの引数を変更し自動起動を有効にする場合は、ホームディレクトリの `.config/systemd/user/ntx.service` を編集し、サービスを起動します。引数の一覧は、`ntx --help`で確認できます。  
 ```bash
-vim ~/.config/systemd/user/ndi-tx.service
-systemctl --user enable --now ndi-tx.service
+vim ~/.config/systemd/user/ntx.service
+systemctl --user enable --now ntx.service
 ```
 初期設定のホスト名は `debian` です。ホスト名を変更するには、`sudo hostnamectl set-hostname <新しいホスト名>` と入力します。
 
 ### サイネージ
 サイネージ機能は moip-toolkit が提供します。Web UIのサービスを起動し、ブラウザから画像をアップロードすると、接続されたディスプレイに全画面で表示されます。  
 ```bash
-systemctl --user enable --now ndi-web.service
+systemctl --user enable --now nweb.service
 ```
 ブラウザで `http://<IPアドレス>:8000/` を開きます(IPアドレスはログイン時に表示されます)。再起動後も設定を保持するには、保存領域を使用します。  
 
 コマンドラインから直接画像を表示することもできます。  
 ```bash
-/opt/moip-toolkit/.venv/bin/python /opt/moip-toolkit/main.py signage -i /path/to/image.png --fullscreen
+moip signage /path/to/image.png
 ```
-`-i` を省略すると、Web UIから最後にアップロードした画像が表示されます。GUIのないコンソール(TTY)では、`--framebuffer` を付けるとLinuxフレームバッファに直接描画します(root権限が必要な場合があります)。  
+`--framebuffer` を付けると、GPUを使わずにLinuxフレームバッファ(`/dev/fb0`)に直接描画します(Liveユーザーは `video` グループに所属しています)。  
 詳細は [moip-toolkit の README](https://github.com/TechnoTUT/moip-toolkit) を参照してください。
 
 ### ブースディスプレイ
