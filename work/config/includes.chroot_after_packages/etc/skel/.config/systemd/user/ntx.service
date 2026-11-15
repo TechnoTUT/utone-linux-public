@@ -1,0 +1,17 @@
+[Unit]
+Description=moip-toolkit NDI sender
+After=network-online.target avahi-daemon.service
+Wants=network-online.target
+
+[Service]
+# See `ntx -h` and `moip devices` for the device options.
+ExecStart=/opt/moip-toolkit/bin/moip tx -n TX -d 0 --width 1280 --height 720 --fps 60 --no-audio
+WorkingDirectory=/opt/moip-toolkit
+Restart=always
+RestartSec=3
+# Cap memory so a runaway process is killed (and restarted) instead of taking down the OS
+MemoryHigh=1G
+MemoryMax=1500M
+
+[Install]
+WantedBy=default.target
