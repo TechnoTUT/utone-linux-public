@@ -28,7 +28,7 @@ systemctl --user enable --now nrx.service
 nrx -s "<NDI Source Name>"
 ```
 - No desktop session may be running on that display (console / TTY state). `sudo systemctl set-default multi-user.target` makes the machine boot without a GUI.
-- Add the user to the `video` and `input` groups: `sudo usermod -aG video,input $USER`
+- The live user is in the `video` and `input` groups. For other users, run `sudo usermod -aG video,input $USER`.
 - Output is always fullscreen. If a desktop session owns the display, it falls back to a window on the desktop.
 
 ### Transmit NDI

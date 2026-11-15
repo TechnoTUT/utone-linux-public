@@ -28,7 +28,7 @@ systemctl --user enable --now nrx.service
 nrx -s "<NDIソース名>"
 ```
 - 対象のディスプレイでデスクトップセッションが動作していない必要があります(コンソール / TTY の状態)。`sudo systemctl set-default multi-user.target` でGUIなしで起動するようになります。
-- ユーザーを `video` と `input` グループに追加します: `sudo usermod -aG video,input $USER`
+- Liveユーザーは `video` と `input` グループに所属しています。他のユーザーでは `sudo usermod -aG video,input $USER` を実行します。
 - 出力は常に全画面になります。デスクトップセッションが画面を使っている場合は、デスクトップ上のウィンドウ表示に切り替わります。
 
 ### NDI送信
