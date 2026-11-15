@@ -5,7 +5,7 @@ English | [日本語](README.ja.md)
 This repository provides a Debian Live environment to easily run edge devices for the on-campus DJ event "The Utopia Tone". It includes [moip-toolkit](https://github.com/TechnoTUT/moip-toolkit) (NDI receive/transmit and digital signage) and [booth-display](https://github.com/TechnoTUT/booth-display) (booth display controller).  
 
 ## How to use
-Download the image from [Releases](https://github.com/TechnoTUT/utone-linux/releases) and write it to a DVD or USB drive. To write to a USB drive, use a tool like [Rufus](https://rufus.ie/).  
+Prebuilt images are not distributed, because a built image contains the NDI runtime, which is covered by the NDI SDK license (see [License](#license)). Build the ISO image yourself as described in [How to build](#how-to-build), then write it to a DVD or USB drive. To write to a USB drive, use a tool like [Rufus](https://rufus.ie/).  
 If you want to keep settings after reboot, specify the size of the persistent storage in Rufus settings. 1GB is sufficient for most cases. If you plan to use NDI transmission or signage, setting up persistent storage is recommended.  
 
 Insert the completed DVD or USB drive into your PC and power it on to boot into the Live environment.  
@@ -70,7 +70,7 @@ systemctl --user enable --now booth.service
 ```
 Open `http://<IP address>:8080/` in a browser to use the Web GUI. Display addresses and crop positions are set in `/opt/booth-display/config.yaml`.  
 
-NDI input uses the NDI runtime (`libndi.so.6`) from the official NDI SDK for Linux. The ISO build downloads the SDK, accepts its license and installs the runtime to `/usr/local/lib`.  
+NDI input uses the NDI runtime (`libndi.so.6`) from the official NDI SDK for Linux. The ISO build downloads the SDK, accepts its license non-interactively and installs the runtime to `/usr/local/lib`, so read the NDI SDK license before you build.  
 See the [booth-display README](https://github.com/TechnoTUT/booth-display) for details.
 
 ## How to build
@@ -103,8 +103,8 @@ sudo apt install live-build make
 ```
 To build the ISO image, clone this repository with the `--recursive` option:  
 ```bash
-git clone https://github.com/TechnoTUT/utone-linux.git --recursive
-cd utone-linux
+git clone https://github.com/TechnoTUT/utone-linux-public.git --recursive
+cd utone-linux-public
 ```
 Build the ISO image with `make`:  
 ```bash
@@ -115,3 +115,8 @@ To clean up build artifacts, run `make clean`:
 ```bash
 make clean
 ```
+
+## License
+The files in this repository are released under the [MIT License](LICENSE). [moip-toolkit](https://github.com/TechnoTUT/moip-toolkit) and [booth-display](https://github.com/TechnoTUT/booth-display) are also MIT-licensed.  
+
+A built ISO image also contains software downloaded during the build under its own license, including the NDI runtime from the NDI SDK for Linux. The NDI SDK license applies to it, so do not redistribute images you build. NDI® is a registered trademark of Vizrt NDI AB.  

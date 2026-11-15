@@ -5,7 +5,7 @@
 このリポジトリは、学内DJイベント "The Utopia Tone" のエッジデバイスを容易に動作させるためのDebian Live環境を提供します。[moip-toolkit](https://github.com/TechnoTUT/moip-toolkit)(NDI送受信とデジタルサイネージ)と[booth-display](https://github.com/TechnoTUT/booth-display)(ブースディスプレイのコントローラ)を含みます。  
 
 ## 使い方
-[Releases](https://github.com/TechnoTUT/utone-linux/releases)からイメージをダウンロードし、DVDまたはUSBメモリに書き込みます。USBメモリに書き込む場合は、[Rufus](https://rufus.ie/)等のツールを使用します。  
+ビルド済みのイメージは配布していません(ビルドしたイメージにはNDI SDKのライセンスが適用されるNDIランタイムが含まれるため。[ライセンス](#ライセンス)を参照)。[ビルド方法](#ビルド方法)の手順でISOイメージをビルドし、DVDまたはUSBメモリに書き込みます。USBメモリに書き込む場合は、[Rufus](https://rufus.ie/)等のツールを使用します。  
 再起動しても設定が保持されるようにするには、Rufusの設定で保存領域のサイズを指定します。1GB程度で十分です。NDI送信やサイネージの設定を行う場合には、保存領域の設定を推奨します。
 
 完成したDVDまたはUSBメモリをPCに挿入し、電源を投入するとLive環境が起動します。
@@ -70,7 +70,7 @@ systemctl --user enable --now booth.service
 ```
 ブラウザで `http://<IPアドレス>:8080/` を開くとWeb GUIを利用できます。各ディスプレイの宛先やクロップ位置は `/opt/booth-display/config.yaml` で設定します。  
 
-NDI入力には、公式NDI SDK for LinuxのNDIランタイム(`libndi.so.6`)を使用します。ISOのビルド時にSDKをダウンロードし、ライセンスに同意したうえで `/usr/local/lib` にランタイムをインストールします。  
+NDI入力には、公式NDI SDK for LinuxのNDIランタイム(`libndi.so.6`)を使用します。ISOのビルド時にSDKをダウンロードし、ライセンスに自動で同意して `/usr/local/lib` にランタイムをインストールします。ビルドする前にNDI SDKのライセンスを確認してください。  
 詳細は [booth-display の README](https://github.com/TechnoTUT/booth-display) を参照してください。
 
 ## ビルド方法
@@ -103,8 +103,8 @@ sudo apt install live-build make
 ```
 このリポジトリを`--recursive`オプションを付けてクローンします。
 ```bash
-git clone https://github.com/TechnoTUT/utone-linux.git --recursive
-cd utone-linux
+git clone https://github.com/TechnoTUT/utone-linux-public.git --recursive
+cd utone-linux-public
 ```
 `make` を使って ISO イメージをビルドします。
 ```bash
@@ -115,3 +115,8 @@ make build
 ```bash
 make clean
 ```
+
+## ライセンス
+このリポジトリのファイルは[MITライセンス](LICENSE)で公開しています。[moip-toolkit](https://github.com/TechnoTUT/moip-toolkit)と[booth-display](https://github.com/TechnoTUT/booth-display)もMITライセンスです。  
+
+ビルドしたISOイメージには、ビルド時にダウンロードされるソフトウェアも含まれ、それぞれのライセンスが適用されます。NDI SDK for LinuxのNDIランタイムにはNDI SDKのライセンスが適用されるため、ビルドしたイメージを再配布しないでください。NDI®はVizrt NDI ABの登録商標です。  
