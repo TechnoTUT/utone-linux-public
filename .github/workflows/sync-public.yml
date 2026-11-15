@@ -1,0 +1,61 @@
+# Mirror the `public` branch of the private repository (TechnoTUT/utone-linux)
+# to the `main` branch of TechnoTUT/utone-linux-public.
+#
+# Setup (once):
+#   1. Create a deploy key with write access on TechnoTUT/utone-linux-public
+#   2. Store its private key as the secret PUBLIC_REPO_DEPLOY_KEY in
+#      TechnoTUT/utone-linux
+#
+# The push is not forced: if utone-linux-public has commits that are not on
+# the `public` branch, the job fails instead of overwriting them.
+name: Sync public repository
+
+on:
+  push:
+    branches: [public]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-public
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    # This file is mirrored too; run only in the private repository
+    if: github.repository == 'TechnoTUT/utone-linux'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: public
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up SSH for the deploy key
+        env:
+          DEPLOY_KEY: ${{ secrets.PUBLIC_REPO_DEPLOY_KEY }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts
+
+      - name: Check that no private components are published
+        run: |
+          git remote add public git@github.com:TechnoTUT/utone-linux-public.git
+          if git fetch public main; then
+            range="FETCH_HEAD..HEAD"
+          else
+            range="HEAD"  # first sync: check the whole history
+          fi
+          # Fail if any commit to be published touches dmxctl
+          if git log -p "$range" -- .gitmodules work | grep -qi dmxctl; then
+            echo "::error::Commits in $range reference dmxctl, which must stay private"
+            exit 1
+          fi
+
+      - name: Push to TechnoTUT/utone-linux-public
+        run: git push public HEAD:main
